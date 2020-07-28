@@ -588,6 +588,12 @@ describe('TokenManager', function() {
     afterEach(function() {
       jest.useRealTimers();
     });
+    it('should register listener for "expired" event', function() {
+      jest.spyOn(Emitter.prototype, 'on');
+      const client = setupSync();
+      expect(Emitter.prototype.on).toHaveBeenCalledWith('expired', client.tokenManager._onTokenExpiredHandler);
+    });
+
     it('automatically renews a token by default', function() {
       var expiresAt = tokens.standardIdTokenParsed.expiresAt;
       return oauthUtil.setupFrame({
