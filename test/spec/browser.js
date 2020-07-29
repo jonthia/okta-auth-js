@@ -3,9 +3,7 @@
 jest.mock('cross-fetch');
 
 import Emitter from 'tiny-emitter';
-import OktaAuth from '../../lib/browser';
-import AuthApiError from '../../lib/errors/AuthApiError';
-import { ACCESS_TOKEN_STORAGE_KEY, ID_TOKEN_STORAGE_KEY } from '../../lib/constants';
+import { OktaAuth, AuthApiError, ACCESS_TOKEN_STORAGE_KEY, ID_TOKEN_STORAGE_KEY } from '@okta/okta-auth-js';
 
 describe('Browser', function() {
   let auth;
