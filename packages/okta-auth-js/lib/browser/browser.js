@@ -308,11 +308,7 @@ proto.signOut = async function (options) {
   if (!idToken) {
     return sdk.closeSession() // can throw if the user cannot be signed out
     .then(function() {
-      if (postLogoutRedirectUri === defaultUri) {
-        window.location.reload();
-      } else {
-        window.location.assign(postLogoutRedirectUri);
-      }
+      window.location.assign(postLogoutRedirectUri);
     });
   }
 

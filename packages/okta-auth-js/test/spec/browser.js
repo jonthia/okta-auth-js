@@ -297,7 +297,7 @@ describe('Browser', function() {
             expect(auth.tokenManager.get).toHaveBeenCalledTimes(1);
             expect(auth.tokenManager.get).toHaveBeenNthCalledWith(1, constants.ACCESS_TOKEN_STORAGE_KEY);
             expect(auth.closeSession).toHaveBeenCalled();
-            expect(window.location.reload).toHaveBeenCalled();
+            expect(window.location.assign).toHaveBeenCalledWith(window.location.origin);
           });
       });
   
@@ -374,7 +374,7 @@ describe('Browser', function() {
         spyOn(auth, 'revokeAccessToken').and.returnValue(Promise.resolve());
       });
 
-      it('Default options: will revokeAccessToken and fallback to closeSession and window.location.reload()', function() {
+      it('Default options: will revokeAccessToken and fallback to closeSession and redirect to window.location.origin', function() {
         spyOn(auth, 'closeSession').and.returnValue(Promise.resolve());
         return auth.signOut()
           .then(function() {
@@ -383,7 +383,7 @@ describe('Browser', function() {
             expect(auth.revokeAccessToken).toHaveBeenCalledWith(accessToken);
             expect(auth.tokenManager.clear).toHaveBeenCalled();
             expect(auth.closeSession).toHaveBeenCalled();
-            expect(window.location.reload).toHaveBeenCalled();
+            expect(window.location.assign).toHaveBeenCalledWith(window.location.origin);
           });
       });
 
