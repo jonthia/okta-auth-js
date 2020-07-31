@@ -10,7 +10,7 @@
 
 - [#422](https://github.com/okta/okta-auth-js/pull/422) Fix bad accessToken storage key in signOut method
 
-## 3,2.1
+## 3.2.1
 
 ### Bug Fixes
 
