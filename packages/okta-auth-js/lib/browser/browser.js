@@ -181,7 +181,7 @@ function OktaAuthBuilder(args) {
 var proto = OktaAuthBuilder.prototype;
 proto._onTokenManagerError = function(error) {
   var code = error.errorCode;
-  if (code === 'login_required' && error.accessToken) {
+  if (code === 'login_required') {
     if (this.options.onSessionExpired) {
       this.options.onSessionExpired();
     } else {

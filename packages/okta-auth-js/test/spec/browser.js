@@ -53,17 +53,6 @@ describe('Browser', function() {
       emitter.emit('error', error);
       expect(onSessionExpired).toHaveBeenCalled();
     });
-
-    it('error with errorCode "login_required" (not accessToken) does not call option "onSessionExpired" function', function() {
-      var onSessionExpired = jest.fn();
-      jest.spyOn(Emitter.prototype, 'on');
-      new OktaAuth({ issuer: 'http://localhost/fake', pkce: false, onSessionExpired: onSessionExpired });
-      var emitter = Emitter.prototype.on.mock.instances[0];
-      expect(onSessionExpired).not.toHaveBeenCalled();
-      var error = { errorCode: 'login_required' };
-      emitter.emit('error', error);
-      expect(onSessionExpired).not.toHaveBeenCalled();
-    });
     
     it('error with unknown errorCode does not call option "onSessionExpired" function', function() {
       var onSessionExpired = jest.fn();
