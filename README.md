@@ -328,7 +328,6 @@ In most cases you will not need to set a value for `responseMode`. Defaults are 
 | `clientId`     | Client Id pre-registered with Okta for the OIDC authentication flow. [Creating your Okta application](#creating-your-okta-appliation) |
 | `redirectUri`  | The url that is redirected to when using `token.getWithRedirect`. This must be listed in your Okta application's [Login redirect URIs](#login-redirect-uris). If no `redirectUri` is provided, defaults to the current origin (`window.location.origin`). [Configuring your Okta application](#configuring-your-okta-application) |
 | `postLogoutRedirectUri` | Specify the url where the browser should be redirected after [signOut](#signout). This url must be listed in your Okta application's [Logout redirect URIs](#logout-redirect-uris). If not specified, your application's origin (`window.location.origin`) will be used.  [Configuring your Okta application](#configuring-your-okta-application) |
-| `onSessionExpired` | A function to be called when the Okta SSO session has expired or was ended outside of the application. A typical handler would initiate a login flow. |
 | `responseMode` | Applicable only for SPA clients using [PKCE OAuth Flow](#pkce-oauth-20-flow). By default, the authorization code is requested and parsed from the search query. Setting this value to `fragment` will cause the URL hash fragment to be used instead. If your application uses or alters the search query portion of the `redirectUri`, you may want to set this option to "fragment". This option affects both [token.getWithRedirect](#tokengetwithredirectoptions) and [token.parseFromUrl](#tokenparsefromurloptions) |
 | `pkce`  | Enable the [PKCE OAuth Flow](#pkce-oauth-20-flow). Default value is `true`. If set to `false`, the authorization flow will use the [Implicit OAuth Flow](#implicit-oauth-20-flow). When PKCE flow is enabled the authorize request will use `response_type=code` and `grant_type=authorization_code` on the token request. All these details are handled for you, including the creation and verification of code verifiers. Tokens can be retrieved on the login callback by calling [token.parseFromUrl](#tokenparsefromurloptions) |
 | `authorizeUrl` | Specify a custom authorizeUrl to perform the OIDC flow. Defaults to the issuer plus "/v1/authorize". |
@@ -373,12 +372,6 @@ var config = {
   // Configure TokenManager to use sessionStorage instead of localStorage
   tokenManager: {
     storage: 'sessionStorage'
-  },
-
-  // Handle session expiration / token renew failure
-  onSessionExpired: function() {
-    console.log('re-authorization is required');
-    authClient.getWithRedirect();
   }
 };
 
@@ -1993,7 +1986,7 @@ authClient.tokenManager.on('renewed', function (key, newToken, oldToken) {
   console.log('Old token:', oldToken);
   console.log('New token:', newToken);
 });
-// Triggered when an OAuthError is returned via the API (typically during auto-renew)
+// Triggered when an OAuthError is returned via the API (typically during token renew)
 authClient.tokenManager.on('error', function (err) {
   console.log('TokenManager error:', err);
   // err.name
@@ -2002,11 +1995,6 @@ authClient.tokenManager.on('error', function (err) {
   // err.errorSummary
   // err.tokenKey
   // err.accessToken
-  if (err.errorCode === 'login_required' && err.accessToken) {
-    // The Okta session has expired or was closed outside the application
-    // The application should return to an unauthenticated state
-    // This error can also be handled using the 'onSessionExpired' option
-  }
 });
 ```
 
