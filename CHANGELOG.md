@@ -6,7 +6,6 @@
 
 - [#440](https://github.com/okta/okta-auth-js/pull/440) Session expiration behaviour fixes
   - Redirect to window.locaiton.origin by default in `sdk.signOut` when session already expired
-  - Trigger `onSessionExpired` callback on both idToken and accessToken renew failures
 
 - [#422](https://github.com/okta/okta-auth-js/pull/422) Fix bad accessToken storage key in signOut method
 
