@@ -265,7 +265,7 @@ tokenManager: {
 }
 ```
 
-By default, the `tokenManager` will attempt to renew expired tokens. When an expired token is requested by the `tokenManager.get()` method, a renewal request is executed to update the token. If you wish to manually control token renewal, set `autoRenew` to false to disable this feature. You can listen to  [`expired`](#tokenmanageronevent-callback-context) events to know when the token has expired.
+By default, the `tokenManager` will attempt to renew tokens before they expire. If you wish to manually control token renewal, set `autoRenew` to false to disable this feature. You can listen to [`expired`](#tokenmanageronevent-callback-context) events to know when the token has expired.
 
 ```javascript
 tokenManager: {
@@ -273,7 +273,7 @@ tokenManager: {
 }
 ```
 
-Renewing tokens slightly early helps ensure a stable user experience. By default, the `expired` event will fire 30 seconds before actual expiration time. If `autoRenew` is set to true, tokens will be renewed within 30 seconds of expiration, if accessed with `tokenManager.get()`. You can customize this value by setting the `expireEarlySeconds` option. The value should be large enough to account for network latency between the client and Okta's servers.
+Renewing tokens slightly early helps ensure a stable user experience. By default, the `expired` event will fire 30 seconds before actual expiration time. If `autoRenew` is set to true, tokens will be renewed within 30 seconds of expiration. You can customize this value by setting the `expireEarlySeconds` option. The value should be large enough to account for network latency and clock drift between the client and Okta's servers.
 
 ```javascript
 // Emit expired event 2 minutes before expiration
@@ -339,7 +339,7 @@ In most cases you will not need to set a value for `responseMode`. Defaults are 
 | `tokenManager` | An object containing additional properties used to configure the internal token manager. |
 
 * `autoRenew`:
-  By default, the library will attempt to renew expired tokens. When an expired token is requested by the library, a renewal request is executed to update the token. If you wish to  to disable auto renewal of tokens, set autoRenew to false.
+  By default, the library will attempt to renew tokens before they expire. If you wish to  to disable auto renewal of tokens, set autoRenew to false.
 
 * `storage`:
   You may pass an object or a string. If passing an object, it should meet the requirements of a [custom storage provider](#storage). Pass a string to specify one of the built-in storage types:
@@ -1907,18 +1907,18 @@ authClient.token.getWithPopup()
 
 #### `tokenManager.get(key)`
 
-Get a token that you have previously added to the `tokenManager` with the given `key`. The token object will be returned if it has not expired.
+Get a token that you have previously added to the `tokenManager` with the given `key`. The token object will be returned if it exists in storage. Tokens will be removed from storage if they have expired and `autoRenew` is false or if there was an error while renewing the token. The `tokenManager` will emit a `removed` event when tokens are removed.
 
 * `key` - Key for the token you want to get
 
 ```javascript
 authClient.tokenManager.get('idToken')
 .then(function(token) {
-  if (token) {
+  if (token && !authClient.tokenManager.hasExpired(token)) {
     // Token is valid
     console.log(token);
   } else {
-    // Token has expired
+    // Token has been removed due to expiration or error while renewing
   }
 })
 .catch(function(err) {
@@ -1926,6 +1926,10 @@ authClient.tokenManager.get('idToken')
   console.error(err);
 });
 ```
+
+#### `tokenManager.hasExpired(token)`
+
+A synchronous method which returns `true` if the token has expired. The `tokenManager` will automatically remove expired tokens in the background. However, when the app first loads this background process may not have completed, so there is a chance that an expired token may exist in storage. This method can be called to avoid this potential race condition. 
 
 #### `tokenManager.remove(key)`
 
@@ -1970,7 +1974,11 @@ authClient.tokenManager.renew('idToken');
 
 Subscribe to an event published by the `tokenManager`.
 
-* `event` - Event to subscribe to. Possible events are `expired`, `error`, and `renewed`.
+* `event` - Event to subscribe to. Possible events are:
+  * `expired` - Fired before a token is set to expire (using `expireEarlySeconds` option, 30 seconds by default). If `autoRenew` option is set to true, a listener will be attached to this event and an attempt will be made to renew the token when the event fires.
+  * `error` - Fired when a token renew attempt has failed. This is a permanent error, and the token will be removed from storage.
+  * `renewed` - Fired when a token has been renewed by the `tokenManager`, either via the `autoRenew` process or as a result of calling `tokenManager.renew`
+  * `removed` - Fired when a token is removed from storage as a result of renew failure, or a call to `tokenManager.remove`. (This event will not fire from `tokenManager.clear`)
 * `callback` - Function to call when the event is triggered
 * `context` - Optional context to bind the callback to
 
