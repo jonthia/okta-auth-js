@@ -11,7 +11,7 @@
  *
  */
 /* global localStorage, sessionStorage */
-var Cookies = require('js-cookie');
+// var Cookies = require('js-cookie');
 var storageBuilder = require('../storageBuilder');
 var constants = require('../constants');
 var AuthSdkError = require('../errors/AuthSdkError');
@@ -132,17 +132,23 @@ storageUtil.storage = {
       // parsed as a Date object, the cookie will set as a session cookie.
       cookieOptions.expires = new Date(expiresAt);
     }
-
-    Cookies.set(name, value, cookieOptions);
+    // Original:
+    // Cookies.set(name, value, cookieOptions);
+    localStorage.setItem(name, value);
+    // return storageUtil.storage.get(name);
     return storageUtil.storage.get(name);
   },
 
   get: function(name) {
-    return Cookies.get(name);
+    // Original:
+    // return Cookies.get(name);
+    return localStorage.getItem(name);
   },
 
   delete: function(name) {
-    return Cookies.remove(name, { path: '/' });
+    // Original:
+    // return Cookies.remove(name, { path: '/' });
+    return localStorage.removeItem(name);
   }
 };
 
